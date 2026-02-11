@@ -185,6 +185,8 @@ Execution:
 Validation:
   This ensures that the declaration is a pure, deterministic output not dependent on instance state. Multiple instances of the same tool should behave identically, which is important in multi-agent or concurrent environments.
 
+
+roost_feedback [11/02/2026, 5:14:40 AM]:Modify\sCode\sto\sfix\sthis\serror\nSuccessfully\scompiled\sbut\sfailed\sat\sruntime.\n\nError\sAnalysis:\n##\sRuntime\sError\sAnalysis\n\n**What\sFailed:**\sMaven\sdependency\sresolution\sfailed\sfor\s`google-adk-maven-plugin`.\sTwo\sSNAPSHOT\sdependencies\s(`google-adk`\sand\s`google-adk-dev`,\sversion\s`0.5.1-SNAPSHOT`)\scannot\sbe\sfound\sin\sany\sconfigured\srepository.\n\n**Where:**\sProject\s`com.google.adk:google-adk-maven-plugin:maven-plugin:0.5.1-SNAPSHOT`\sduring\sdependency\sresolution\sphase.\n\n**Why:**\sThe\sSNAPSHOT\sartifacts\s`google-adk:0.5.1-SNAPSHOT`\sand\s`google-adk-dev:0.5.1-SNAPSHOT`\sare\snot\sinstalled\sin\sthe\slocal\sMaven\srepository\s(`~/.m2/repository`)\snor\savailable\sin\sany\sconfigured\sremote\srepository.\sThis\sis\sa\smulti-module\sbuild\swhere\sdependent\smodules\swere\slikely\snot\sbuilt/installed\sfirst.\n\n**Investigate:**\n1.\s**Build\sorder**\s—\sRun\s`mvn\sinstall`\son\sthe\sparent/root\sPOM\sfirst\sto\sensure\s`google-adk`\sand\s`google-adk-dev`\smodules\sare\sbuilt\sand\sinstalled\slocally\sbefore\sthe\splugin\smodule.\n2.\s**Local\srepo**\s—\sCheck\s`~/.m2/repository/com/google/adk/google-adk/0.5.1-SNAPSHOT/`\sfor\sthe\sartifact\sJAR/POM.\n3.\s**Reactor\sorder**\s—\sIf\sthis\sis\sa\smulti-module\sproject,\sverify\sthe\sparent\sPOM\'s\s`<modules>`\slists\s`google-adk`\sand\s`google-adk-dev`\s**before**\s`google-adk-maven-plugin`.\n4.\s**Repository\sconfig**\s—\sIf\sartifacts\scome\sfrom\sa\sremote\ssnapshot\srepo,\sverify\s`<repositories>`\sin\s`pom.xml`\sor\s`settings.xml`\sincludes\sthe\scorrect\ssnapshot\srepository\swith\s`<snapshots><enabled>true</enabled></snapshots>`.,
 */
 
 // ********RoostGPT********
@@ -215,21 +217,15 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationReturnsNonEmptyOptional() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
-    // Assert
     assertTrue(result.isPresent(), "declaration() should return a non-empty Optional");
   }
 
   @Test
   @Tag("valid")
   void declarationHasCorrectFunctionName() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
-    // Assert
     assertTrue(functionDeclaration.name().isPresent(), "Function name should be present");
     assertEquals(
         "get_weather", functionDeclaration.name().get(), "Function name should be 'get_weather'");
@@ -238,11 +234,8 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationHasCorrectDescription() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
-    // Assert
     assertTrue(functionDeclaration.description().isPresent(), "Description should be present");
     assertEquals(
         "Get current weather information for a city",
@@ -253,12 +246,9 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationParametersTypeIsObject() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
-    // Assert
     assertTrue(parametersSchema.type().isPresent(), "Parameters type should be present");
     assertEquals(
         "OBJECT", parametersSchema.type().get(), "Parameters schema type should be 'OBJECT'");
@@ -267,13 +257,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationParametersContainsCityProperty() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Optional<Map<String, Schema>> properties = parametersSchema.properties();
-    // Assert
     assertTrue(properties.isPresent(), "Properties should be present");
     assertTrue(properties.get().containsKey("city"), "Properties should contain 'city' key");
   }
@@ -281,13 +268,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationCityPropertyTypeIsString() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Schema citySchema = parametersSchema.properties().get().get("city");
-    // Assert
     assertNotNull(citySchema, "City schema should not be null");
     assertTrue(citySchema.type().isPresent(), "City type should be present");
     assertEquals("STRING", citySchema.type().get(), "City property type should be 'STRING'");
@@ -296,13 +280,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationCityPropertyHasCorrectDescription() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Schema citySchema = parametersSchema.properties().get().get("city");
-    // Assert
     assertNotNull(citySchema, "City schema should not be null");
     assertTrue(citySchema.description().isPresent(), "City description should be present");
     assertEquals(
@@ -314,13 +295,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationCityIsRequiredParameter() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Optional<List<String>> required = parametersSchema.required();
-    // Assert
     assertTrue(required.isPresent(), "Required list should be present");
     assertTrue(required.get().contains("city"), "Required list should contain 'city'");
   }
@@ -328,13 +306,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("boundary")
   void declarationRequiredListHasExactlyOneElement() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Optional<List<String>> required = parametersSchema.required();
-    // Assert
     assertTrue(required.isPresent(), "Required list should be present");
     assertEquals(1, required.get().size(), "Required list should contain exactly one element");
   }
@@ -342,13 +317,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("boundary")
   void declarationPropertiesMapHasExactlyOneEntry() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result = getWeatherTool.declaration();
     FunctionDeclaration functionDeclaration = result.get();
     Schema parametersSchema = functionDeclaration.parameters().get();
     Optional<Map<String, Schema>> properties = parametersSchema.properties();
-    // Assert
     assertTrue(properties.isPresent(), "Properties should be present");
     assertEquals(1, properties.get().size(), "Properties map should contain exactly one entry");
   }
@@ -356,11 +328,8 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationReturnsConsistentResultsAcrossMultipleCalls() {
-    // Arrange - done in setUp
-    // Act
     Optional<FunctionDeclaration> result1 = getWeatherTool.declaration();
     Optional<FunctionDeclaration> result2 = getWeatherTool.declaration();
-    // Assert
     assertTrue(result1.isPresent(), "First declaration should be present");
     assertTrue(result2.isPresent(), "Second declaration should be present");
     assertEquals(
@@ -380,11 +349,8 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationWorksOnFreshInstance() {
-    // Arrange
     GetWeatherTool freshTool = new GetWeatherTool();
-    // Act
     Optional<FunctionDeclaration> result = freshTool.declaration();
-    // Assert
     assertTrue(result.isPresent(), "Declaration should be present on fresh instance");
     assertEquals("get_weather", result.get().name().get(), "Name should be 'get_weather'");
     assertEquals(
@@ -399,13 +365,10 @@ class GetWeatherToolDeclarationTest {
   @Test
   @Tag("valid")
   void declarationIsEquivalentAcrossDifferentInstances() {
-    // Arrange
     GetWeatherTool tool1 = new GetWeatherTool();
     GetWeatherTool tool2 = new GetWeatherTool();
-    // Act
     Optional<FunctionDeclaration> declaration1 = tool1.declaration();
     Optional<FunctionDeclaration> declaration2 = tool2.declaration();
-    // Assert
     assertTrue(declaration1.isPresent(), "First instance declaration should be present");
     assertTrue(declaration2.isPresent(), "Second instance declaration should be present");
     FunctionDeclaration fd1 = declaration1.get();
